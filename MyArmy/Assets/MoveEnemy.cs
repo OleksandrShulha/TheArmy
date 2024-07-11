@@ -1,30 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEngine.Windows;
 
-
-
-public class Move : MonoBehaviour
+public class MoveEnemy : MonoBehaviour
 {
-    [SerializeField] private float speed = 2f;
-    [SerializeField] private float hp = 200f;
+    [SerializeField] float speed = 2f;
 
     public bool go = true;
     public bool isHaveTarget = false;
     public bool isFindTarget = false;
 
     private Transform target;
-
     Animator anim;
-
-
 
 
     void Start()
     {
-
         anim = GetComponent<Animator>();
 
     }
@@ -33,12 +24,8 @@ public class Move : MonoBehaviour
     {
         MoveToTarget();
         FindTarget();
-        Atack();
-        AnimationHero();
-    }
 
-    public void Atack()
-    {
+
         if (isFindTarget)
         {
             float dist = Vector3.Distance(target.position, transform.position);
@@ -51,34 +38,28 @@ public class Move : MonoBehaviour
                 isHaveTarget = false;
             }
         }
+        if (!go || !isHaveTarget && !isFindTarget)
+        {
+            AnimationHero(1);
+        }
+        if (go || isFindTarget && !isHaveTarget)
+        {
+            AnimationHero(2);
+        }
+        if (!go && isHaveTarget && isHaveTarget)
+        {
+            AnimationHero(3);
+        }
     }
 
-    public void AnimationHero()
+    public void AnimationHero(int stateHero)
     {
-        if (!go || !isHaveTarget && !isFindTarget && hp>0)
-        {
-            anim.speed = 1F;
-            anim.SetInteger("State", 1);
-        }
-        if (go || isFindTarget && !isHaveTarget && hp > 0)
-        {
-            anim.speed = 1F;
-            anim.SetInteger("State", 2);
-        }
-        if (!go && isHaveTarget && isFindTarget && hp > 0)
-        {
-            anim.speed = 1F;
-            anim.SetInteger("State", 3);
-        }
-        if (hp <= 0)
-        {
-            anim.SetInteger("State", 4);
-        }
+        anim.SetInteger("State", stateHero);
     }
 
     public void FindTarget()
     {
-        List<GameObject> enemyes = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemies"));
+        List<GameObject> enemyes = new List<GameObject>(GameObject.FindGameObjectsWithTag("Hero"));
         if (enemyes.Count > 0)
         {
             go = false;
@@ -98,7 +79,6 @@ public class Move : MonoBehaviour
         else
         {
             isFindTarget = false;
-            isHaveTarget = false;
         }
 
     }
@@ -108,7 +88,7 @@ public class Move : MonoBehaviour
     {
         if (go == true)
         {
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0,transform.position.y,0), Time.deltaTime * speed);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0, transform.position.y, 0), Time.deltaTime * speed);
         }
 
         if (isFindTarget && !isHaveTarget)
@@ -116,6 +96,15 @@ public class Move : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, target.position, Time.deltaTime * speed);
         }
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        go = false;
+        isHaveTarget = true;
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        isHaveTarget = false;
+    }
+
 }
-
-
