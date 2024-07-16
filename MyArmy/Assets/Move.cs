@@ -15,9 +15,12 @@ public class Move : MonoBehaviour
     public bool isHaveTarget = false;
     public bool isFindTarget = false;
 
-    private Transform target;
+    private Vector3 targetPointToMove;
 
-    Animator anim;
+    private Transform targetToMove;
+    private Transform targetToBaseMove;
+
+    private Animator anim;
 
 
 
@@ -27,12 +30,14 @@ public class Move : MonoBehaviour
 
         anim = GetComponent<Animator>();
 
+        GameObject enemyBase = GameObject.FindGameObjectWithTag("EnemyBase");
+        targetPointToMove = new Vector3(enemyBase.transform.position.x, (Random.Range(-2.5f, 0.8f)), 0f);
     }
 
     void Update()
     {
         MoveToTarget();
-        FindTarget();
+        FindTargetEnemy();
         Atack();
         AnimationHero();
     }
@@ -41,10 +46,11 @@ public class Move : MonoBehaviour
     {
         if (isFindTarget)
         {
-            float dist = Vector3.Distance(target.position, transform.position);
+            float dist = Vector3.Distance(targetToMove.position, transform.position);
             if (dist < 0.5)
             {
                 isHaveTarget = true;
+                go = false;
             }
             else
             {
@@ -76,20 +82,19 @@ public class Move : MonoBehaviour
         }
     }
 
-    public void FindTarget()
+    public void FindTargetEnemy()
     {
         List<GameObject> enemyes = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemies"));
         if (enemyes.Count > 0)
         {
-            go = false;
             float curentDist = Vector3.Distance(enemyes[0].transform.position, transform.position);
-            target = enemyes[0].transform;
-            foreach (GameObject go in enemyes)
+            targetToMove = enemyes[0].transform;
+            foreach (GameObject enemy in enemyes)
             {
-                float dist = Vector3.Distance(go.transform.position, transform.position);
+                float dist = Vector3.Distance(enemy.transform.position, transform.position);
                 if (dist < curentDist)
                 {
-                    target = go.transform;
+                    targetToMove = enemy.transform;
                     curentDist = dist;
                 }
             }
@@ -106,15 +111,31 @@ public class Move : MonoBehaviour
 
     public void MoveToTarget()
     {
-        if (go == true)
+        if (!isFindTarget && !isHaveTarget)
         {
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0,transform.position.y,0), Time.deltaTime * speed);
+            transform.position = Vector3.MoveTowards(transform.position, targetPointToMove, Time.deltaTime * speed);
         }
 
         if (isFindTarget && !isHaveTarget)
         {
-            transform.position = Vector3.MoveTowards(transform.position, target.position, Time.deltaTime * speed);
+            transform.position = Vector3.MoveTowards(transform.position, targetToMove.position, Time.deltaTime * speed);
         }
+
+
+
+
+
+        //if (go)
+        //{
+        //    transform.position = Vector3.MoveTowards(transform.position, targetToMove.position, Time.deltaTime * speed);
+        //}
+
+        //if(!go && !isFindTarget)
+        //{
+        //    GameObject enemyBase = GameObject.FindGameObjectWithTag("EnemyBase");
+        //    transform.position = Vector3.MoveTowards(transform.position, enemyBase.transform.position, Time.deltaTime * speed);
+        //}
+        
     }
 }
 
