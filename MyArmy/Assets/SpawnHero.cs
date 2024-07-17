@@ -21,6 +21,7 @@ public class SpawnHero : MonoBehaviour
 
     public void SpawnKnight1()
     {
-        Instantiate(enemy, transform.position,Quaternion.identity);
+        GameObject inst = Instantiate(enemy, transform.position,Quaternion.identity) as GameObject;
+        
     }
 }
