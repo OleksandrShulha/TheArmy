@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,7 @@ using UnityEngine.UIElements;
 
 
 
-public class Move : MonoBehaviour
+public class Knight : MonoBehaviour
 {
     //Paladin Stats
     public float Speed { get; set; } = 0.5f;
@@ -16,7 +17,7 @@ public class Move : MonoBehaviour
     public float PAtack { get; set; } = 320f;
     public float CritChanсe { get; set; } = 44f;
     public float AtackSpeed { get; set; } = 416f;
-    [SerializeField] private bool isPhysical = true;
+    private bool isPhysical = true;
 
 
 
@@ -28,13 +29,18 @@ public class Move : MonoBehaviour
     private Transform targetToMoveEnemy;
     private GameObject enemyBase;
 
-    StatsLVL statsLVL;
+    private GameObject curentTargetEnemy; 
+
+    private StatsLVL statsLVL;
 
 
     private Animator anim;
     private SpriteRenderer sprite;
 
     private IEnumerator coroutineBlinkHero;
+
+
+    [SerializeField] GameObject bullet;
 
 
     //Завдання
@@ -48,6 +54,9 @@ public class Move : MonoBehaviour
         anim = GetComponent<Animator>();
         statsLVL = FindAnyObjectByType<StatsLVL>();
         sprite = GetComponent<SpriteRenderer>();
+
+        //anim = GetComponentInChildren<Animator>();
+        //sprite = GetComponentInChildren<SpriteRenderer>();
 
         enemyBase = GameObject.FindGameObjectWithTag("EnemyBase");
 
@@ -70,6 +79,8 @@ public class Move : MonoBehaviour
 
         AnimationHero();
 
+
+        //Тест
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Hp += 200;
@@ -81,6 +92,8 @@ public class Move : MonoBehaviour
             Debug.Log(Hp);
         }
 
+
+        Debug.Log(curentTargetEnemy);
     }
 
     public void DeadHero()
@@ -104,6 +117,21 @@ public class Move : MonoBehaviour
         }
     }
 
+    public void CreateBulletForAttack()
+    {
+        GameObject bulletGO = Instantiate(bullet, transform.position, Quaternion.identity) as GameObject;
+        bulletGO.GetComponent<Bullet>().SetisPhysical(isPhysical);
+        if ((int)Random.Range(1f, 101f) < CritChanсe / 200 * 100)
+        {
+            bulletGO.GetComponent<Bullet>().SetPowerAtack(PAtack * 2);
+        }
+        else
+        {
+            bulletGO.GetComponent<Bullet>().SetPowerAtack(PAtack);
+        }
+        bulletGO.GetComponent<Bullet>().SettargetToMoveEnemy(curentTargetEnemy);
+    }
+
     public void LoadStats()
     {
 
@@ -111,13 +139,13 @@ public class Move : MonoBehaviour
         MDef = MDef * Mathf.Pow(1.0223f, statsLVL.MDefLVL - 1);
         PDef = PDef * Mathf.Pow(1.0301f, statsLVL.PDefLVL - 1);
         PAtack = PAtack * Mathf.Pow(1.0189f, statsLVL.PAtackLVL - 1);
-        Debug.Log("hp = " + Hp);
-        Debug.Log("mDef = " + MDef);
-        Debug.Log("pDef = " + PDef);
-        Debug.Log("pAtack = " + PAtack);
-        Debug.Log("speed = " + Speed);
-        Debug.Log("сritChanсe = " + CritChanсe);
-        Debug.Log("atackSpeed = " + AtackSpeed);
+        //Debug.Log("hp = " + Hp);
+        //Debug.Log("mDef = " + MDef);
+        //Debug.Log("pDef = " + PDef);
+        //Debug.Log("pAtack = " + PAtack);
+        //Debug.Log("speed = " + Speed);
+        //Debug.Log("сritChanсe = " + CritChanсe);
+        //Debug.Log("atackSpeed = " + AtackSpeed);
         
     }
 
@@ -192,6 +220,7 @@ public class Move : MonoBehaviour
             go = true;
             float curentDist = Vector3.Distance(enemyes[0].transform.position, transform.position);
             targetToMoveEnemy = enemyes[0].transform;
+            curentTargetEnemy = enemyes[0];
             foreach (GameObject enemy in enemyes)
             {
                 float dist = Vector3.Distance(enemy.transform.position, transform.position);
@@ -199,6 +228,7 @@ public class Move : MonoBehaviour
                 {
                     targetToMoveEnemy = enemy.transform;
                     curentDist = dist;
+                    curentTargetEnemy = enemy;
                 }
             }
             isFindTarget = true;
@@ -210,6 +240,7 @@ public class Move : MonoBehaviour
             if(enemyBase != null)
             {
                 go = true;
+                curentTargetEnemy = enemyBase;
             }
             else
             {
