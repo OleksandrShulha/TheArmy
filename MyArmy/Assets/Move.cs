@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 public class Move : MonoBehaviour
 {
     //Paladin Stats
-    public float Speed { get; set; } = 2f;
+    public float Speed { get; set; } = 0.5f;
     public float Hp { get; set; } = 1487f;
     public float MDef { get; set; } = 366f;
     public float PDef { get; set; } = 370f;
@@ -17,6 +17,7 @@ public class Move : MonoBehaviour
     public float CritChanсe { get; set; } = 44f;
     public float AtackSpeed { get; set; } = 416f;
     [SerializeField] private bool isPhysical = true;
+
 
 
     public bool go = true;
@@ -31,10 +32,12 @@ public class Move : MonoBehaviour
 
 
     private Animator anim;
+    private SpriteRenderer sprite;
+
+    private IEnumerator coroutineBlinkHero;
 
 
     //Завдання
-    //Функція смерті
     //Створення пулі під час атаки
     //Залежність хотьби і атаки від статів
     //Бафи і апгрейди
@@ -44,7 +47,11 @@ public class Move : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         statsLVL = FindAnyObjectByType<StatsLVL>();
+        sprite = GetComponent<SpriteRenderer>();
+
         enemyBase = GameObject.FindGameObjectWithTag("EnemyBase");
+
+        coroutineBlinkHero = BlinkHero();
 
         //Target point on base to move
         targetToMoveBase = new Vector3(enemyBase.transform.position.x, (Random.Range(-2.5f, 0.8f)), 0f);
@@ -74,7 +81,27 @@ public class Move : MonoBehaviour
             Debug.Log(Hp);
         }
 
+    }
 
+    public void DeadHero()
+    {
+        StartCoroutine(coroutineBlinkHero);
+    }
+    public void DestroyHero()
+    {
+        StopCoroutine(coroutineBlinkHero);
+        Destroy(gameObject);
+    }
+
+    private IEnumerator BlinkHero()
+    {
+        while (true)
+        {
+            sprite.color = new Color(1, 1, 1, 0.5f);
+            yield return new WaitForSeconds(0.1f);
+            sprite.color = new Color(1, 1, 1, 1);
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
     public void LoadStats()
